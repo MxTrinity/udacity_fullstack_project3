@@ -1,0 +1,22 @@
+SELECT z.day, cast(q.err as decimal) / z.ok AS ratio
+FROM (
+	SELECT 
+	    date_trunc('day',time) as day, status as stat1, COUNT(*) as OK
+	FROM
+	    log 
+	WHERE
+		status = '200 OK'
+	GROUP BY
+	    day, stat1
+) AS z
+JOIN (
+	SELECT 
+    	date_trunc('day',time) as day, status as stat2, COUNT(*) as err
+	FROM
+    	log 
+    WHERE
+		status = '404 NOT FOUND'
+	GROUP BY
+    	day, stat2
+) AS q ON z.day = q.day 
+WHERE cast(q.err as decimal) / z.ok >= 0.01;
